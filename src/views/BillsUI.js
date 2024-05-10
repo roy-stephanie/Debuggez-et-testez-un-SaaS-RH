@@ -20,7 +20,11 @@ const row = (bill) => {
   }
 
 const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+    if (!Array.isArray(data)) return "";
+    // Sort invoices by date in descending order.
+    // If dates are formatted strings, convert them to Date objects for sorting.
+    const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+    return (sortedData && sortedData.length) ? sortedData.map(bill => row(bill)).join("") : ""
 }
 
 export default ({ data: bills, loading, error }) => {
