@@ -5,8 +5,9 @@
 import '@testing-library/jest-dom'
 import {screen, waitFor} from "@testing-library/dom"
 import BillsUI from "../views/BillsUI.js"
+import Bills from '../containers/Bills.js'
 import {bills} from "../fixtures/bills.js"
-import {ROUTES_PATH} from "../constants/routes.js";
+import { ROUTES, ROUTES_PATH } from '../constants/routes.js'
 import {localStorageMock} from "../__mocks__/localStorage.js";
 import router from "../app/Router.js";
 
@@ -50,6 +51,30 @@ describe('Given I am logged in as an employee', () => {
 
       // Assert: The dates should be correctly sorted
       expect(dates).toEqual(datesSorted)
+    })
+  })
+
+  // Scenario when navigating to NewBill page
+  describe('Given I navigate to NewBill', () => {
+    // The test where the navigation to NewBill happens correctly
+    test('navigate to NewBill', () => {
+      // Create a button in the DOM
+      document.body.innerHTML = `<button data-testid="btn-new-bill"></button>`
+
+      // Mock the onNavigate function
+      const onNavigate = jest.fn((pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      })
+
+      // Initialize Bills
+      const bills = new Bills({ document, localStorage, onNavigate })
+
+      // Get new bill button and simulate click
+      const newBillButton = document.querySelector(`button[data-testid="btn-new-bill"]`)
+      newBillButton.click()
+
+      // Assert onNavigate has been called with correct path
+      expect(onNavigate).toHaveBeenCalledWith(ROUTES_PATH['NewBill'])
     })
   })
 })
