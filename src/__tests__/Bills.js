@@ -117,4 +117,49 @@ describe('Given I am logged in as an employee', () => {
       expect(screen.getByTestId('form-new-bill')).toBeTruthy()
     })
   })
+
+  // Describes the scenario when the user clicks on the eye of a bill
+  describe('When I click on the eye of a bill', () => {
+    // The test where a modal appears correctly
+    test('Then a modal appears', async () => {
+      // Define the function to navigate to the given pathname
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      // Set user type to 'Employee'
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
+
+      // Initialize Bills instance
+      const billsInitialization = new Bills({
+        document, onNavigate, store: null, localStorage: window.localStorage,
+      })
+
+      // Render the Bills page
+      document.body.innerHTML = BillsUI({ data: bills })
+
+      // Mock handleClickIconEye function
+      const handleClickIconEye = jest.fn(e => billsInitialization.handleClickIconEye(e))
+
+      // Fetch all eye icons in the document
+      const eyeIcons = screen.getAllByTestId('icon-eye')
+
+      // Fetch modal element
+      const modal = document.getElementById('modaleFile')
+
+      // Mock jQuery's modal function
+      $.fn.modal = jest.fn(() => modal.classList.add('show'))
+
+      // Whenever an eye icon is clicked, it should trigger the handleClickIconEye function
+      eyeIcons.forEach((icon) => {
+        icon.addEventListener('click', handleClickIconEye.bind(null, icon))
+        userEvent.click(icon)
+        expect(handleClickIconEye).toHaveBeenCalled()
+      })
+
+      // After an eye icon is clicked, the modal should be showing up in the screen
+      expect(modal).toHaveClass('show')
+    })
+  })
 })
