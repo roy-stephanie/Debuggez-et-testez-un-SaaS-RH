@@ -162,4 +162,29 @@ describe('Given I am logged in as an employee', () => {
       expect(modal).toHaveClass('show')
     })
   })
+
+  // Describes the scenario when user navigates to Bills page
+  describe('When I navigate to Bills', () => {
+    let onNavigate, bills
+
+    // Before each of the test case, perform these set of actions
+    beforeEach(() => {
+      // Define the function to be triggered when the user navigates to a new page
+      onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
+
+      bills = new Bills({ document, onNavigate, store: null, localStorage: window.localStorage })
+
+      // Render the Bills page
+      document.body.innerHTML = BillsUI({ data: bills })
+    })
+
+    // Check whether the Bills page shows up correctly
+    test('Then the page shows up', async () => {
+      await waitFor(() => expect(screen.getByText('Mes notes de frais')).toBeTruthy())
+    })
+  })
 })
