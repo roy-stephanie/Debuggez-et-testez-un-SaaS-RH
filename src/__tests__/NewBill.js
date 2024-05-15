@@ -5,6 +5,7 @@
 import { fireEvent, screen } from '@testing-library/dom'
 import { localStorageMock } from '../__mocks__/localStorage.js'
 import { ROUTES, ROUTES_PATH } from '../constants/routes.js'
+import router from '../app/Router.js'
 import NewBillUI from "../views/NewBillUI.js"
 import NewBill from "../containers/NewBill.js"
 
@@ -42,6 +43,24 @@ describe('Given I am logged in as an employee', () => {
 
       // Assert submit event is fired
       expect(handleSubmit).toHaveBeenCalled()
+    })
+  })
+
+  describe('When I navigate to the NewBill Page', () => {
+    test('Then show the new bill page', async () => {
+      // Simulate a logged in Employee
+      localStorage.setItem('user', JSON.stringify({ type: 'Employee', email: 'a@a' }))
+
+      // Create root div for navigation
+      const root = document.createElement('div')
+      root.setAttribute('id', 'root')
+      document.body.append(root)
+
+      // Setup navigation system
+      router()
+
+      // Programmatic navigation to the NewBill Page
+      window.onNavigate(ROUTES_PATH.NewBill)
     })
   })
 })
