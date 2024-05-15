@@ -13,16 +13,33 @@ export default class NewBill {
     this.fileUrl = null
     this.fileName = null
     this.billId = null
+    this.VALID_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif'];
     new Logout({ document, localStorage, onNavigate })
   }
+
+  hasValidExtension = fileName => {
+    const ext = fileName.split('.').pop().toLowerCase();
+    return this.VALID_EXTENSIONS.includes(ext);
+  }
+
   handleChangeFile = e => {
     e.preventDefault()
-    const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
+    const fileInput = this.document.querySelector(`input[data-testid="file"]`)
+    //const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
+
+    if (!this.hasValidExtension(fileName)) {
+      $("#file-error").text("Fichier invalide. Les extensions acceptées sont : " + this.VALID_EXTENSIONS.join(', '))
+      $(fileInput).val('');
+      return;
+    } else {
+      $("#file-error").text('')
+    }
+
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
-    formData.append('file', file)
+    formData.append('file', fileInput)
     formData.append('email', email)
 
     this.store
