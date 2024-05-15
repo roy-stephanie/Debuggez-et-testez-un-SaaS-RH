@@ -10,6 +10,7 @@ import Bills from '../containers/Bills.js'
 import {bills} from "../fixtures/bills.js"
 import { ROUTES, ROUTES_PATH } from '../constants/routes.js'
 import {localStorageMock} from "../__mocks__/localStorage.js";
+import mockStore from '../__mocks__/store'
 import router from "../app/Router.js";
 
 // Describes the scenario where the user is an employee
@@ -186,5 +187,45 @@ describe('Given I am logged in as an employee', () => {
     test('Then the page shows up', async () => {
       await waitFor(() => expect(screen.getByText('Mes notes de frais')).toBeTruthy())
     })
+  })
+
+  // Describing the scenario when an error occurs on the API
+  describe('When an error occurs on the API', () => {
+    let root
+    // Before each of the test case, perform these set of actions
+    beforeEach(() => {
+      // Mock store's bills method
+      jest.spyOn(mockStore, 'bills')
+
+      // Set user type and email in localStorage
+      window.localStorage.setItem('user', JSON.stringify({ type: 'Employee', email: 'a@a' }))
+
+      // Create a new div to set as root and attach it to the body
+      root = document.createElement('div')
+      root.setAttribute('id', 'root')
+      document.body.append(root)
+
+      // Initialize router
+      router()
+    })
+
+    // Shared function to test various types of API failure
+    const testErrorDisplay = async (errorMessage) => {
+      // If an error occurs, mock the error message and reject the promise
+      mockStore.bills.mockImplementationOnce(() => ({
+        list: () => Promise.reject(new Error(errorMessage)),
+      }))
+
+      // Set the body of the document to BillsUI with the error message
+      document.body.innerHTML = BillsUI({ error: errorMessage })
+
+      // Expect the screen to display an element with the error message
+      const message = await screen.getByText(new RegExp(errorMessage, 'i'))
+      expect(message).toBeTruthy()
+    }
+
+    test('Then fetches bills from API and fails with 404 error message', () => testErrorDisplay('Erreur 404'))
+
+    test('Then fetches messages from an API and fails with 500 error message', () => testErrorDisplay('Erreur 500'))
   })
 })
