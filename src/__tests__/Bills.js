@@ -3,6 +3,7 @@
  */
 
 import '@testing-library/jest-dom'
+import userEvent from '@testing-library/user-event'
 import {screen, waitFor} from "@testing-library/dom"
 import BillsUI from "../views/BillsUI.js"
 import Bills from '../containers/Bills.js'
@@ -75,6 +76,45 @@ describe('Given I am logged in as an employee', () => {
 
       // Assert onNavigate has been called with correct path
       expect(onNavigate).toHaveBeenCalledWith(ROUTES_PATH['NewBill'])
+    })
+  })
+
+  // Describes the scenario when the user clicks on New Expense Note (bill)
+  describe('When I click on New Expense Note', () => {
+    // The test where the new bill form appears correctly
+    test('Then a new bill form appears', async () => {
+      // Define the onNavigate function
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      // Set user type to 'Employee'
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
+
+      // Initialize Bills class
+      const billsInitialization = new Bills({
+        document, onNavigate, store: null, localStorage: window.localStorage,
+      })
+
+      // Render the UI
+      document.body.innerHTML = BillsUI({ data: billsInitialization })
+
+      // Mock event listener
+      const handleClickNewBill = jest.fn(billsInitialization.handleClickNewBill.bind(bills))
+      const newBillBtn = screen.getByTestId('btn-new-bill')
+      newBillBtn.addEventListener('click', handleClickNewBill)
+
+      // Trigger click event
+      userEvent.click(newBillBtn)
+      // Assert event listener has been called
+      expect(handleClickNewBill).toHaveBeenCalled()
+
+      // Wait for form to be in the document
+      await waitFor(() => screen.getByTestId('form-new-bill'))
+
+      // Assert form is in the document
+      expect(screen.getByTestId('form-new-bill')).toBeTruthy()
     })
   })
 })
