@@ -228,4 +228,38 @@ describe('Given I am logged in as an employee', () => {
 
     test('Then fetches messages from an API and fails with 500 error message', () => testErrorDisplay('Erreur 500'))
   })
+
+  // Test pour vérifier que les factures sont triées par date dans la méthode getBills()
+  describe('When I call getBills method', () => {
+    test('Then bills should be ordered from earliest to latest', async () => {
+      // Mock the store
+      const storeMock = {
+        bills: () => ({
+          list: jest.fn().mockResolvedValueOnce(bills)
+        })
+      };
+
+      // Set user type to 'Employee'
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
+
+      // Initialize Bills class
+      const billsInstance = new Bills({
+        document, onNavigate: jest.fn(), store: storeMock, localStorage: window.localStorage
+      });
+
+      // Call getBills method
+      const result = await billsInstance.getBills()
+
+      // Extract dates from the result
+      const dates = result.map(bill => bill.date)
+
+      // Define antiChrono function for sorting in reverse chronological order
+      const antiChrono = (a, b) => ((a < b) ? 1 : -1)
+      const datesSorted = [...dates].sort(antiChrono)
+
+      // Assert: The dates should be correctly sorted
+      expect(dates).toEqual(datesSorted)
+    })
+  })
 })

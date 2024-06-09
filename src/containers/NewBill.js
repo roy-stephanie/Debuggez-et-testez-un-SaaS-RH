@@ -13,7 +13,7 @@ export default class NewBill {
     this.fileUrl = null
     this.fileName = null
     this.billId = null
-    this.VALID_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif'];
+    this.VALID_EXTENSIONS = ['jpg', 'jpeg', 'png'];
     new Logout({ document, localStorage, onNavigate })
   }
 
@@ -24,14 +24,13 @@ export default class NewBill {
 
   handleChangeFile = e => {
     e.preventDefault()
-    const fileInput = this.document.querySelector(`input[data-testid="file"]`)
-    //const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
+    const fileInput = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
 
     if (!this.hasValidExtension(fileName)) {
       $("#file-error").text("Fichier invalide. Les extensions acceptées sont : " + this.VALID_EXTENSIONS.join(', '))
-      $(fileInput).val('');
+      this.document.querySelector(`input[data-testid="file"]`).value = ''
       return;
     } else {
       $("#file-error").text('')
